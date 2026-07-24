@@ -1,11 +1,13 @@
-﻿"""FlyRank W3 · A2 — Stage 0: create SQLite database."""
+﻿"""FlyRank W3 · A2 — Stage 1: database read endpoints."""
 
 from __future__ import annotations
 
 import sqlite3
 from pathlib import Path
+from typing import Any
 
 from fastapi import FastAPI
+from fastapi.responses import JSONResponse
 
 DB_PATH = Path(__file__).resolve().parent / "tasks.db"
 
@@ -43,6 +45,10 @@ def init_db() -> None:
         conn.commit()
 
 
+def row_to_task(row: sqlite3.Row) -> dict[str, Any]:
+    return {"id": row["id"], "title": row["title"], "done": bool(row["done"])}
+
+
 app = FastAPI(title="Task API", version="2.0.0")
 
 
@@ -65,3 +71,22 @@ def root():
 @app.get("/health")
 def health():
     return {"status": "ok", "database": DB_PATH.name}
+
+
+@app.get("/tasks")
+def list_tasks():
+    with get_connection() as conn:
+        rows = conn.execute("SELECT * FROM tasks").fetchall()
+    return [row_to_task(r) for r in rows]
+
+
+@app.get("/tasks/{task_id}")
+def get_task(task_id: int):
+    with get_connection() as conn:
+        row = conn.execute(
+            "SELECT * FROM tasks WHERE id = ?",
+            (task_id,),
+        ).fetchone()
+    if row is None:
+        return JSONResponse(status_code=404, content={"error": "Task not found"})
+    return row_to_task(row)
