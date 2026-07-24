@@ -1,4 +1,4 @@
-﻿"""FlyRank W3 · A2 — Stage 1: database read endpoints."""
+﻿"""FlyRank W3 · A2 — Stage 2: insert into database."""
 
 from __future__ import annotations
 
@@ -6,7 +6,7 @@ import sqlite3
 from pathlib import Path
 from typing import Any
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
 DB_PATH = Path(__file__).resolve().parent / "tasks.db"
@@ -89,4 +89,34 @@ def get_task(task_id: int):
         ).fetchone()
     if row is None:
         return JSONResponse(status_code=404, content={"error": "Task not found"})
+    return row_to_task(row)
+
+
+@app.post("/tasks", status_code=201)
+async def create_task(request: Request):
+    try:
+        body = await request.json()
+    except Exception:
+        return JSONResponse(status_code=400, content={"error": "Request body must be JSON"})
+
+    if not isinstance(body, dict):
+        return JSONResponse(status_code=400, content={"error": "Request body must be a JSON object"})
+
+    title = body.get("title")
+    if title is None or not isinstance(title, str) or not title.strip():
+        return JSONResponse(
+            status_code=400,
+            content={"error": "title is required and must be a non-empty string"},
+        )
+
+    with get_connection() as conn:
+        cur = conn.execute(
+            "INSERT INTO tasks (title, done) VALUES (?, ?)",
+            (title.strip(), 0),
+        )
+        conn.commit()
+        row = conn.execute(
+            "SELECT * FROM tasks WHERE id = ?",
+            (cur.lastrowid,),
+        ).fetchone()
     return row_to_task(row)
