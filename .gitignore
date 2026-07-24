@@ -13,3 +13,9 @@ _checkpoint.py
 create.json
 ai-version/tasks.db
 ai-version/tasks.db-journal
+ai-version/tasks_v2.db
+ai-version/tasks_v2.db-journal
+assets/db-browser-preview.html
+W3 - Connecting your CRUD to the database.pdf
+_pdf_extract.txt
+_checkpoint.py
