@@ -1,0 +1,15 @@
+﻿__pycache__/
+*.py[cod]
+.venv/
+venv/
+.env
+.DS_Store
+_pdf_extract.txt
+*.log
+.pytest_cache/
+tasks.db
+tasks.db-journal
+_checkpoint.py
+create.json
+ai-version/tasks.db
+ai-version/tasks.db-journal
