@@ -19,3 +19,6 @@ assets/db-browser-preview.html
 W3 - Connecting your CRUD to the database.pdf
 _pdf_extract.txt
 _checkpoint.py
+
+# Local Netlify folder
+.netlify
